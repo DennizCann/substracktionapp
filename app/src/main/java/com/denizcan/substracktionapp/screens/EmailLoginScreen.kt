@@ -13,7 +13,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.denizcan.substracktionapp.data.DataStoreRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.google.firebase.firestore.FirebaseFirestore
+import com.denizcan.substracktionapp.util.localized
+import kotlinx.coroutines.tasks.await
+import androidx.compose.ui.platform.LocalContext
+import com.denizcan.substracktionapp.components.CommonTopBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailLoginScreen(
     navController: NavController,
@@ -25,7 +31,10 @@ fun EmailLoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var rememberMe by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
 
     LaunchedEffect(Unit) {
         if (dataStoreRepository.isRememberMeEnabled().first()) {
@@ -35,174 +44,182 @@ fun EmailLoginScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = if (currentLanguage == "tr") "E-posta ile Giriş" else "Sign in with Email",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text(if (currentLanguage == "tr") "E-posta" else "Email") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            singleLine = true
-        )
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text(if (currentLanguage == "tr") "Şifre" else "Password") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            visualTransformation = PasswordVisualTransformation(),
-            singleLine = true
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = rememberMe,
-                onCheckedChange = { rememberMe = it }
-            )
-            Text(
-                text = if (currentLanguage == "tr") "Beni Hatırla" else "Remember Me",
-                modifier = Modifier.padding(start = 8.dp)
+    Scaffold(
+        topBar = {
+            CommonTopBar(
+                title = "continue_with_email".localized(currentLanguage),
+                navController = navController
             )
         }
-
-        Row(
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.End
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            TextButton(
-                onClick = {
-                    if (email.isEmpty()) {
-                        errorMessage = if (currentLanguage == "tr") {
-                            "Lütfen e-posta adresinizi girin"
-                        } else {
-                            "Please enter your email address"
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text(if (currentLanguage == "tr") "E-posta" else "Email") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                singleLine = true
+            )
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text(if (currentLanguage == "tr") "Şifre" else "Password") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = rememberMe,
+                    onCheckedChange = { rememberMe = it }
+                )
+                Text(
+                    text = if (currentLanguage == "tr") "Beni Hatırla" else "Remember Me",
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    onClick = {
+                        if (email.isEmpty()) {
+                            errorMessage = if (currentLanguage == "tr") {
+                                "Lütfen e-posta adresinizi girin"
+                            } else {
+                                "Please enter your email address"
+                            }
+                            return@TextButton
                         }
-                        return@TextButton
+                        
+                        isLoading = true
+                        errorMessage = null
+                        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                            .addOnSuccessListener {
+                                errorMessage = if (currentLanguage == "tr") {
+                                    "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi."
+                                } else {
+                                    "Password reset link has been sent to your email."
+                                }
+                                isLoading = false
+                            }
+                            .addOnFailureListener { exception ->
+                                errorMessage = if (currentLanguage == "tr") {
+                                    "Şifre sıfırlama e-postası gönderilemedi: ${exception.localizedMessage}"
+                                } else {
+                                    "Failed to send password reset email: ${exception.localizedMessage}"
+                                }
+                                isLoading = false
+                            }
                     }
-                    
+                ) {
+                    Text(
+                        text = if (currentLanguage == "tr") "Şifremi Unuttum" else "Forgot Password",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            Button(
+                onClick = {
+                    if (email.isEmpty() || password.isEmpty()) {
+                        errorMessage = "please_fill_all".localized(currentLanguage)
+                        return@Button
+                    }
+
                     isLoading = true
                     errorMessage = null
-                    FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-                        .addOnSuccessListener {
-                            errorMessage = if (currentLanguage == "tr") {
-                                "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi."
-                            } else {
-                                "Password reset link has been sent to your email."
-                            }
-                            isLoading = false
-                        }
-                        .addOnFailureListener { exception ->
-                            errorMessage = if (currentLanguage == "tr") {
-                                "Şifre sıfırlama e-postası gönderilemedi: ${exception.localizedMessage}"
-                            } else {
-                                "Failed to send password reset email: ${exception.localizedMessage}"
-                            }
-                            isLoading = false
-                        }
-                }
-            ) {
-                Text(
-                    text = if (currentLanguage == "tr") "Şifremi Unuttum" else "Forgot Password",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
 
-        errorMessage?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-
-        Button(
-            onClick = {
-                isLoading = true
-                errorMessage = null
-                FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-                    .addOnSuccessListener {
-                        val user = FirebaseAuth.getInstance().currentUser
-                        if (user?.isEmailVerified == true) {
+                    auth.signInWithEmailAndPassword(email, password)
+                        .addOnSuccessListener { authResult ->
+                            // Kullanıcı başarıyla giriş yaptıktan sonra Firestore kontrolü
                             scope.launch {
-                                if (rememberMe) {
-                                    dataStoreRepository.saveLoginCredentials(email, password)
-                                } else {
-                                    dataStoreRepository.clearLoginCredentials()
+                                try {
+                                    val userDoc = db.collection("users")
+                                        .document(authResult.user!!.uid)
+                                        .get()
+                                        .await()
+
+                                    if (!userDoc.exists() || userDoc.getBoolean("profileCompleted") != true) {
+                                        navController.navigate(Screen.UserInfo.route) {
+                                            popUpTo(Screen.LoginOptions.route) { inclusive = true }
+                                        }
+                                    } else {
+                                        navController.navigate(Screen.Home.route) {
+                                            popUpTo(Screen.LoginOptions.route) { inclusive = true }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    // Firestore'a erişimde hata olursa güvenli tarafta kal ve UserInfo'ya yönlendir
+                                    navController.navigate(Screen.UserInfo.route) {
+                                        popUpTo(Screen.LoginOptions.route) { inclusive = true }
+                                    }
+                                } finally {
+                                    isLoading = false
                                 }
                             }
-                            navController.navigate(Screen.Home.route) {
-                                popUpTo(Screen.LoginOptions.route) { inclusive = true }
-                            }
-                        } else {
-                            // Email onaylanmamış
-                            FirebaseAuth.getInstance().signOut()
-                            errorMessage = if (currentLanguage == "tr") {
-                                "Lütfen önce e-posta adresinizi onaylayın. Onay e-postası gönderildi."
-                            } else {
-                                "Please verify your email first. Verification email has been sent."
-                            }
-                            // Yeni onay maili gönder
-                            user?.sendEmailVerification()
+                        }
+                        .addOnFailureListener { e ->
+                            errorMessage = e.localizedMessage
                             isLoading = false
                         }
-                    }
-                    .addOnFailureListener { exception ->
-                        errorMessage = if (currentLanguage == "tr") {
-                            "Giriş başarısız: ${exception.localizedMessage}"
-                        } else {
-                            "Login failed: ${exception.localizedMessage}"
-                        }
-                        isLoading = false
-                    }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty()
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text(if (currentLanguage == "tr") "Giriş Yap" else "Sign In")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty()
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text(if (currentLanguage == "tr") "Giriş Yap" else "Sign In")
+                }
             }
-        }
 
-        TextButton(
-            onClick = { navController.navigate(Screen.EmailSignup.route) }
-        ) {
-            Text(
-                if (currentLanguage == "tr") 
-                "Hesabınız yok mu? Kayıt olun" 
-                else 
-                "Don't have an account? Sign up"
-            )
+            TextButton(
+                onClick = { navController.navigate(Screen.EmailSignup.route) }
+            ) {
+                Text(
+                    if (currentLanguage == "tr") 
+                    "Hesabınız yok mu? Kayıt olun" 
+                    else 
+                    "Don't have an account? Sign up"
+                )
+            }
         }
     }
 } 

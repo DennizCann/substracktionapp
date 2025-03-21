@@ -1,6 +1,5 @@
 package com.denizcan.substracktionapp.screens
 
-import Country
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -12,6 +11,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.denizcan.substracktionapp.components.CommonTopBar
+import com.denizcan.substracktionapp.model.Country
+import com.denizcan.substracktionapp.model.CountryData
 import com.denizcan.substracktionapp.util.localized
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

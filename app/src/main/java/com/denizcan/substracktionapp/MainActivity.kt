@@ -59,9 +59,14 @@ class MainActivity : ComponentActivity() {
                                     .get()
                                     .await()
 
-                                if (userDoc.exists() && userDoc.getBoolean("profileCompleted") == true) {
+                                if (!userDoc.exists()) {
+                                    // Kullanıcı dökümanı yoksa UserInfo'ya yönlendir
+                                    Screen.UserInfo.route
+                                } else if (userDoc.getBoolean("profileCompleted") == true) {
+                                    // Profil tamamlanmışsa ana sayfaya yönlendir
                                     Screen.Home.route
                                 } else {
+                                    // Profil tamamlanmamışsa UserInfo'ya yönlendir
                                     Screen.UserInfo.route
                                 }
                             } catch (e: Exception) {
@@ -158,12 +163,12 @@ class MainActivity : ComponentActivity() {
                                 .await()
 
                             runOnUiThread {
-                                if (userDoc.exists() && userDoc.getBoolean("profileCompleted") == true) {
-                                    navController?.navigate(Screen.Home.route) {
+                                if (!userDoc.exists() || userDoc.getBoolean("profileCompleted") != true) {
+                                    navController?.navigate(Screen.UserInfo.route) {
                                         popUpTo(Screen.LoginOptions.route) { inclusive = true }
                                     }
                                 } else {
-                                    navController?.navigate(Screen.UserInfo.route) {
+                                    navController?.navigate(Screen.Home.route) {
                                         popUpTo(Screen.LoginOptions.route) { inclusive = true }
                                     }
                                 }

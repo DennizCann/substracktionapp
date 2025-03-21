@@ -1,6 +1,5 @@
 package com.denizcan.substracktionapp.screens
 
-import Country
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -8,11 +7,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.denizcan.substracktionapp.model.Country
+import com.denizcan.substracktionapp.model.CountryData
 import com.denizcan.substracktionapp.navigation.Screen
 import com.denizcan.substracktionapp.util.localized
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

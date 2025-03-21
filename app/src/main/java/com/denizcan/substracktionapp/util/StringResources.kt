@@ -90,7 +90,14 @@ object StringResources {
         "payment_details" to "Ödeme Detayları",
         "amount" to "Tutar",
         "service" to "Servis",
-        "date" to "Tarih"
+        "date" to "Tarih",
+        
+        // Login Options
+        "welcome_title" to "SubsTracktion'a\nHoş Geldiniz",
+        "welcome_subtitle" to "Üyeliklerinizi kolayca takip edin,\nmaliyetlerinizi kontrol altında tutun",
+        "continue_with_google" to "Google ile Devam Et",
+        "continue_with_email" to "E-posta ile Devam Et",
+        "or" to "veya"
     )
 
     private val enStrings = mapOf(
@@ -175,6 +182,13 @@ object StringResources {
         "payment_details" to "Payment Details",
         "amount" to "Amount",
         "service" to "Service",
-        "date" to "Date"
+        "date" to "Date",
+        
+        // Login Options
+        "welcome_title" to "Welcome to\nSubsTracktion",
+        "welcome_subtitle" to "Easily track your subscriptions,\nkeep your costs under control",
+        "continue_with_google" to "Continue with Google",
+        "continue_with_email" to "Continue with Email",
+        "or" to "or"
     )
 } 
