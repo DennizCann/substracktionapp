@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "853494014560",
+    "project_id": "substracktionapp",
+    "storage_bucket": "substracktionapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853494014560:android:7efcd1c1cd002a462a9905",
+        "android_client_info": {
+          "package_name": "com.denizcan.substracktionapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDalG-GSgCWE8NO8yeZsdV8Yz4PoDlK_ig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
