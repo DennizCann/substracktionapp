@@ -97,7 +97,34 @@ object StringResources {
         "welcome_subtitle" to "Üyeliklerinizi kolayca takip edin,\nmaliyetlerinizi kontrol altında tutun",
         "continue_with_google" to "Google ile Devam Et",
         "continue_with_email" to "E-posta ile Devam Et",
-        "or" to "veya"
+        "or" to "veya",
+        
+        // Categories
+        "category_entertainment" to "Eğlence",
+        "category_shopping" to "Alışveriş",
+        "category_productivity" to "Verimlilik",
+        "category_cloud" to "Bulut Depolama",
+        "category_education" to "Eğitim",
+        "category_health" to "Sağlık",
+        "category_gaming" to "Oyun",
+        "category_finance" to "Finans",
+        "category_communication" to "İletişim",
+        "category_other" to "Diğer",
+        "quarterly" to "3 Aylık",
+        "biannually" to "6 Aylık",
+        
+        "description" to "Açıklama (Opsiyonel)",
+        "select_category" to "Kategori Seçin",
+        "select_color" to "Renk Seçin",
+        "delete_subscription_confirm" to "Bu üyeliği silmek istediğinizden emin misiniz?",
+        "active_subscriptions" to "Aktif Üyelikler",
+        "category_analysis" to "Kategori Analizi",
+        "edit_subscription" to "Üyeliği Düzenle",
+        "payments_for_date" to "Günün Ödemeleri",
+        "no_payments_for_date" to "Bu güne ait ödeme bulunmuyor",
+        "weekly" to "Haftalık",
+        "start_date" to "Başlangıç Tarihi",
+        "ok" to "Tamam"
     )
 
     private val enStrings = mapOf(
@@ -189,6 +216,33 @@ object StringResources {
         "welcome_subtitle" to "Easily track your subscriptions,\nkeep your costs under control",
         "continue_with_google" to "Continue with Google",
         "continue_with_email" to "Continue with Email",
-        "or" to "or"
+        "or" to "or",
+        
+        // Categories
+        "category_entertainment" to "Entertainment",
+        "category_shopping" to "Shopping",
+        "category_productivity" to "Productivity",
+        "category_cloud" to "Cloud Storage",
+        "category_education" to "Education",
+        "category_health" to "Health",
+        "category_gaming" to "Gaming",
+        "category_finance" to "Finance",
+        "category_communication" to "Communication",
+        "category_other" to "Other",
+        "quarterly" to "Quarterly",
+        "biannually" to "Biannually",
+        
+        "description" to "Description (Optional)",
+        "select_category" to "Select Category",
+        "select_color" to "Select Color",
+        "delete_subscription_confirm" to "Are you sure you want to delete this subscription?",
+        "active_subscriptions" to "Active Subscriptions",
+        "category_analysis" to "Category Analysis",
+        "edit_subscription" to "Edit Subscription",
+        "payments_for_date" to "Payments for Date",
+        "no_payments_for_date" to "No payments for this date",
+        "weekly" to "Weekly",
+        "start_date" to "Start Date",
+        "ok" to "OK"
     )
 } 

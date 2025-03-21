@@ -9,6 +9,14 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
+data class UserPreferences(
+    val language: String = "tr",
+    val country: String = "TR",
+    val currency: String = "TRY",
+    val currencySymbol: String = "₺",
+    val isRememberMeEnabled: Boolean = false
+)
+
 class DataStoreRepository(private val context: Context) {
     
     private val isIntroShownKey = booleanPreferencesKey("is_intro_shown")
@@ -16,6 +24,16 @@ class DataStoreRepository(private val context: Context) {
     private val savedEmailKey = stringPreferencesKey("saved_email")
     private val savedPasswordKey = stringPreferencesKey("saved_password")
     private val rememberMeKey = booleanPreferencesKey("remember_me")
+
+    private val Context.dataStore by preferencesDataStore(name = "user_preferences")
+
+    private object PreferencesKeys {
+        val LANGUAGE = stringPreferencesKey("language")
+        val COUNTRY = stringPreferencesKey("country")
+        val CURRENCY = stringPreferencesKey("currency")
+        val CURRENCY_SYMBOL = stringPreferencesKey("currency_symbol")
+        val REMEMBER_ME = booleanPreferencesKey("remember_me")
+    }
 
     suspend fun saveIntroShown() {
         context.dataStore.edit { preferences ->
@@ -74,4 +92,16 @@ class DataStoreRepository(private val context: Context) {
             preferences[rememberMeKey] ?: false
         }
     }
+
+    suspend fun updateCountryInfo(country: String, currency: String, currencySymbol: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.COUNTRY] = country
+            preferences[PreferencesKeys.CURRENCY] = currency
+            preferences[PreferencesKeys.CURRENCY_SYMBOL] = currencySymbol
+        }
+    }
+
+    fun getCountry() = context.dataStore.data.map { it[PreferencesKeys.COUNTRY] ?: "TR" }
+    fun getCurrency() = context.dataStore.data.map { it[PreferencesKeys.CURRENCY] ?: "TRY" }
+    fun getCurrencySymbol() = context.dataStore.data.map { it[PreferencesKeys.CURRENCY_SYMBOL] ?: "₺" }
 } 

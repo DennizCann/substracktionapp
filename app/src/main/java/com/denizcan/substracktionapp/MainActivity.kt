@@ -24,8 +24,13 @@ import com.denizcan.substracktionapp.auth.GoogleAuthUiClient
 import kotlinx.coroutines.launch
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
+    private val mainScope = MainScope() // Ana thread için Coroutine scope
     private lateinit var dataStoreRepository: DataStoreRepository
     private lateinit var googleAuthUiClient: GoogleAuthUiClient
     private val languageViewModel: LanguageViewModel by viewModels {
@@ -35,8 +40,16 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dataStoreRepository = DataStoreRepository(applicationContext)
-        googleAuthUiClient = GoogleAuthUiClient(applicationContext)
+        
+        // Firebase ve Google Sign-In işlemlerini background thread'e taşıyalım
+        mainScope.launch(Dispatchers.IO) {
+            try {
+                dataStoreRepository = DataStoreRepository(applicationContext)
+                googleAuthUiClient = GoogleAuthUiClient(applicationContext)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
         
         setContent {
             val currentLanguage by languageViewModel.currentLanguage.collectAsState()
@@ -113,14 +126,19 @@ class MainActivity : ComponentActivity() {
                     composable(Screen.Home.route) {
                         HomeScreen(
                             navController = navControllerLocal,
-                            currentLanguage = currentLanguage
+                            currentLanguage = currentLanguage,
+                            dataStoreRepository = dataStoreRepository
                         )
                     }
                     composable(Screen.Profile.route) {
                         ProfileScreen(navController = navControllerLocal, currentLanguage = currentLanguage)
                     }
                     composable(Screen.Subscriptions.route) {
-                        SubscriptionsScreen(navController = navControllerLocal, currentLanguage = currentLanguage)
+                        SubscriptionsScreen(
+                            navController = navControllerLocal,
+                            currentLanguage = currentLanguage,
+                            dataStoreRepository = dataStoreRepository
+                        )
                     }
                     composable(Screen.Analytics.route) {
                         AnalyticsScreen(navController = navControllerLocal, currentLanguage = currentLanguage)
@@ -146,38 +164,47 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mainScope.cancel() // Activity destroy edildiğinde scope'u temizle
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQ_GOOGLE_SIGN_IN) {
-            try {
-                data?.let { intent ->
-                    lifecycleScope.launch {
+            mainScope.launch(Dispatchers.IO) {
+                try {
+                    data?.let { intent ->
                         val signInResult = googleAuthUiClient.signInWithIntent(intent)
-                        if (signInResult.data != null) {
-                            // Google ile giriş yapıldığında da profil bilgilerini kontrol et
-                            val userDoc = FirebaseFirestore.getInstance()
-                                .collection("users")
-                                .document(signInResult.data.userId)
-                                .get()
-                                .await()
+                        withContext(Dispatchers.Main) {
+                            if (signInResult.data != null) {
+                                // Firestore işlemlerini background'da yap
+                                withContext(Dispatchers.IO) {
+                                    val userDoc = FirebaseFirestore.getInstance()
+                                        .collection("users")
+                                        .document(signInResult.data.userId)
+                                        .get()
+                                        .await()
 
-                            runOnUiThread {
-                                if (!userDoc.exists() || userDoc.getBoolean("profileCompleted") != true) {
-                                    navController?.navigate(Screen.UserInfo.route) {
-                                        popUpTo(Screen.LoginOptions.route) { inclusive = true }
-                                    }
-                                } else {
-                                    navController?.navigate(Screen.Home.route) {
-                                        popUpTo(Screen.LoginOptions.route) { inclusive = true }
+                                    withContext(Dispatchers.Main) {
+                                        if (!userDoc.exists() || userDoc.getBoolean("profileCompleted") != true) {
+                                            navController?.navigate(Screen.UserInfo.route) {
+                                                popUpTo(Screen.LoginOptions.route) { inclusive = true }
+                                            }
+                                        } else {
+                                            navController?.navigate(Screen.Home.route) {
+                                                popUpTo(Screen.LoginOptions.route) { inclusive = true }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }
