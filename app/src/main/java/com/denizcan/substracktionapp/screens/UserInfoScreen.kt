@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.denizcan.substracktionapp.model.Country
 import com.denizcan.substracktionapp.model.CountryData
+import com.denizcan.substracktionapp.model.PlanType
 import com.denizcan.substracktionapp.navigation.Screen
 import com.denizcan.substracktionapp.util.localized
 import com.google.firebase.auth.FirebaseAuth
@@ -133,7 +134,10 @@ fun UserInfoScreen(
                             "country" to selectedCountry!!.code,
                             "currency" to selectedCountry!!.currency.code,
                             "currencySymbol" to selectedCountry!!.currency.symbol,
-                            "profileCompleted" to true
+                            "profileCompleted" to true,
+                            "planType" to PlanType.FREE.name,
+                            "subscriptionCount" to 0,
+                            "isTrialActive" to false
                         )
 
                         db.collection("users")

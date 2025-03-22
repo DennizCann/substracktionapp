@@ -28,6 +28,8 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
+import com.denizcan.substracktionapp.theme.ThemeMode
+import androidx.compose.foundation.isSystemInDarkTheme
 
 class MainActivity : ComponentActivity() {
     private val mainScope = MainScope() // Ana thread için Coroutine scope
@@ -54,7 +56,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val currentLanguage by languageViewModel.currentLanguage.collectAsState()
             
-            SubsTracktionAppTheme {
+            App(dataStoreRepository) {
                 val navControllerLocal = rememberNavController()
                 navController = navControllerLocal
                 
@@ -159,6 +161,12 @@ class MainActivity : ComponentActivity() {
                             currentLanguage = currentLanguage
                         )
                     }
+                    composable(Screen.Premium.route) {
+                        PremiumScreen(
+                            navController = navControllerLocal,
+                            currentLanguage = currentLanguage
+                        )
+                    }
                 }
             }
         }
@@ -211,5 +219,31 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val REQ_GOOGLE_SIGN_IN = 2
+    }
+}
+
+@Composable
+fun App(
+    dataStoreRepository: DataStoreRepository,
+    content: @Composable () -> Unit
+) {
+    var currentTheme by remember { mutableStateOf(ThemeMode.SYSTEM) }
+    
+    // Tema tercihini yükle
+    LaunchedEffect(Unit) {
+        dataStoreRepository.getThemeMode().collect { theme ->
+            currentTheme = ThemeMode.fromString(theme)
+        }
+    }
+
+    val systemTheme = isSystemInDarkTheme()
+    val isDarkTheme = when (currentTheme) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> systemTheme
+    }
+
+    SubsTracktionAppTheme(darkTheme = isDarkTheme) {
+        content()
     }
 }

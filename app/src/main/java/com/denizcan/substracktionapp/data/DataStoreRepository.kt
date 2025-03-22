@@ -24,6 +24,8 @@ class DataStoreRepository(private val context: Context) {
         val CURRENCY = stringPreferencesKey("currency")
         val CURRENCY_SYMBOL = stringPreferencesKey("currency_symbol")
         val REMEMBER_ME = booleanPreferencesKey("remember_me")
+        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
     }
 
     suspend fun saveIntroShown() {
@@ -95,4 +97,24 @@ class DataStoreRepository(private val context: Context) {
     fun getCountry() = context.dataStore.data.map { it[PreferencesKeys.COUNTRY] ?: "TR" }
     fun getCurrency() = context.dataStore.data.map { it[PreferencesKeys.CURRENCY] ?: "TRY" }
     fun getCurrencySymbol() = context.dataStore.data.map { it[PreferencesKeys.CURRENCY_SYMBOL] ?: "₺" }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    fun getNotificationsEnabled() = context.dataStore.data.map { 
+        it[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: false 
+    }
+
+    suspend fun setThemeMode(mode: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.THEME_MODE] = mode
+        }
+    }
+
+    fun getThemeMode() = context.dataStore.data.map { 
+        it[PreferencesKeys.THEME_MODE] ?: "system" 
+    }
 } 

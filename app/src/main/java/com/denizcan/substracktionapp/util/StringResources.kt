@@ -138,7 +138,34 @@ object StringResources {
         "delete_account_confirm_button" to "Hesabımı Sil",
         "close" to "Kapat",
         "no_upcoming_payments" to "Yaklaşan ödeme bulunmuyor",
-        "tomorrow" to "Yarın"
+        "tomorrow" to "Yarın",
+        "subscription_limit_reached" to "Üyelik limitine ulaştınız",
+        "upgrade_to_premium" to "Premium'a yükseltin",
+        "subscription_limit_message" to "Daha fazla üyelik eklemek için Premium'a yükseltin",
+        "current_plan" to "Mevcut Plan",
+        "free_plan" to "Ücretsiz Plan",
+        "premium_plan" to "Premium Plan",
+        "save_yearly" to "Yıllık planla %17 tasarruf edin",
+        "features_included" to "Dahil Olan Özellikler",
+        "upgrade_now" to "Hemen Yükselt",
+        "subscription_remaining" to "Kalan üyelik hakkı: %d",
+        "current_subscription_count" to "Mevcut üyelik sayınız: %d",
+        "notification_reminders" to "Ödeme Hatırlatıcıları",
+        "notification_description" to "Yaklaşan ödemeler için bildirim al",
+        "premium_feature" to "Premium Özellik",
+        "notifications_premium_message" to "Bildirimler premium üyelere özel bir özelliktir. Premium'a yükseltmek ister misiniz?",
+        
+        // Bildirimler
+        "payment_reminder" to "Ödeme Hatırlatıcısı",
+        "payment_reminder_message" to "%s için %s ödemeniz yarın",
+        
+        // TR
+        "theme_settings" to "Tema Ayarları",
+        "app_theme" to "Uygulama Teması",
+        "select_theme" to "Tema Seç",
+        "theme_light" to "Açık Tema",
+        "theme_dark" to "Koyu Tema",
+        "theme_system" to "Sistem Teması",
     )
 
     private val enStrings = mapOf(
@@ -271,6 +298,33 @@ object StringResources {
         "delete_account_confirm_button" to "Delete My Account",
         "close" to "Close",
         "no_upcoming_payments" to "No upcoming payments",
-        "tomorrow" to "Tomorrow"
+        "tomorrow" to "Tomorrow",
+        "subscription_limit_reached" to "Subscription limit reached",
+        "upgrade_to_premium" to "Upgrade to Premium",
+        "subscription_limit_message" to "Upgrade to Premium to add more subscriptions",
+        "current_plan" to "Current Plan",
+        "free_plan" to "Free Plan",
+        "premium_plan" to "Premium Plan",
+        "save_yearly" to "Save 17% with yearly plan",
+        "features_included" to "Features Included",
+        "upgrade_now" to "Upgrade Now",
+        "subscription_remaining" to "Subscriptions remaining: %d",
+        "current_subscription_count" to "Your current subscription count: %d",
+        "notification_reminders" to "Payment Reminders",
+        "notification_description" to "Get notified for upcoming payments",
+        "premium_feature" to "Premium Feature",
+        "notifications_premium_message" to "Notifications are a premium feature. Would you like to upgrade to Premium?",
+        
+        // Notifications
+        "payment_reminder" to "Payment Reminder",
+        "payment_reminder_message" to "Your payment of %s for %s is due tomorrow",
+        
+        // EN
+        "theme_settings" to "Theme Settings",
+        "app_theme" to "App Theme",
+        "select_theme" to "Select Theme",
+        "theme_light" to "Light Theme",
+        "theme_dark" to "Dark Theme",
+        "theme_system" to "System Theme",
     )
 } 

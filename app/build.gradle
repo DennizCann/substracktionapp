@@ -81,4 +81,7 @@ dependencies {
 
     // ThreeTenABP
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.6'
+
+    // WorkManager
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
 }

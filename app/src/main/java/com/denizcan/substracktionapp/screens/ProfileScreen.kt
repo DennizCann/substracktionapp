@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import java.io.ByteArrayOutputStream
 import android.graphics.BitmapFactory
 import com.denizcan.substracktionapp.navigation.Screen
+import com.denizcan.substracktionapp.model.PlanType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +51,8 @@ fun ProfileScreen(
     var profileImageBase64 by remember { mutableStateOf<String?>(null) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var planType by remember { mutableStateOf(PlanType.FREE) }
+    var subscriptionCount by remember { mutableStateOf(0) }
     
     val context = LocalContext.current
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -106,6 +109,8 @@ fun ProfileScreen(
                     val countryCode = doc.getString("country")
                     selectedCountry = CountryData.countries.find { it.code == countryCode }
                     profileImageBase64 = doc.getString("profileImage")
+                    planType = PlanType.valueOf(doc.getString("planType") ?: PlanType.FREE.name)
+                    subscriptionCount = doc.getLong("subscriptionCount")?.toInt() ?: 0
                 }
             } catch (e: Exception) {
                 error = e.localizedMessage
@@ -226,6 +231,56 @@ fun ProfileScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+                    }
+                }
+
+                // Mevcut plan bilgisi kartı
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "current_plan".localized(currentLanguage),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = if (planType == PlanType.FREE) 
+                                        "free_plan" else "premium_plan"
+                                        .localized(currentLanguage),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                if (planType == PlanType.FREE) {
+                                    Text(
+                                        text = "subscription_remaining"
+                                            .localized(currentLanguage)
+                                            .format(10 - subscriptionCount),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            
+                            if (planType == PlanType.FREE) {
+                                Button(
+                                    onClick = { navController.navigate(Screen.Premium.route) }
+                                ) {
+                                    Text("upgrade_to_premium".localized(currentLanguage))
+                                }
+                            }
                         }
                     }
                 }

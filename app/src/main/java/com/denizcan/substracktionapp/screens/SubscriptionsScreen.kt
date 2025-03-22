@@ -25,6 +25,10 @@ import com.denizcan.substracktionapp.util.localized
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import com.denizcan.substracktionapp.data.DataStoreRepository
+import com.denizcan.substracktionapp.model.User
+import com.denizcan.substracktionapp.model.PlanType
+import com.denizcan.substracktionapp.navigation.Screen
+import com.google.firebase.firestore.FieldValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,10 +49,41 @@ fun SubscriptionsScreen(
     val db = FirebaseFirestore.getInstance()
     val scope = rememberCoroutineScope()
 
+    var showUpgradeDialog by remember { mutableStateOf(false) }
+    var userPlanInfo by remember { mutableStateOf<User?>(null) }
+
     // Kullanıcı tercihlerini yükle
     LaunchedEffect(Unit) {
         dataStoreRepository.getCountry().collect { country = it }
         dataStoreRepository.getCurrency().collect { currency = it }
+    }
+
+    // Kullanıcı bilgilerini yükle
+    LaunchedEffect(Unit) {
+        currentUser?.let { user ->
+            try {
+                // Kullanıcı dokümanını gerçek zamanlı dinleyelim
+                db.collection("users")
+                    .document(user.uid)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null) {
+                            return@addSnapshotListener
+                        }
+                        snapshot?.let { doc ->
+                            userPlanInfo = User(
+                                id = user.uid,
+                                name = doc.getString("name") ?: "",
+                                email = user.email ?: "",
+                                planType = PlanType.valueOf(doc.getString("planType") ?: PlanType.FREE.name),
+                                subscriptionCount = doc.getLong("subscriptionCount")?.toInt() ?: 0,
+                                isTrialActive = doc.getBoolean("isTrialActive") ?: false
+                            )
+                        }
+                    }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     // Üyelikleri yükle
@@ -72,13 +107,78 @@ fun SubscriptionsScreen(
         }
     }
 
+    // Önce addSubscription fonksiyonunu tanımlayalım
+    fun addSubscription(subscription: Subscription) {
+        scope.launch {
+            try {
+                currentUser?.let { user ->
+                    // Önce üyeliği ekle
+                    db.collection("subscriptions")
+                        .add(subscription.copy(userId = user.uid))
+                        .await()
+
+                    // Sonra sayacı güncelle
+                    db.collection("users")
+                        .document(user.uid)
+                        .update("subscriptionCount", FieldValue.increment(1))
+                        .await()
+
+                    // Dialog'u kapat
+                    showDialog = false
+                }
+            } catch (e: Exception) {
+                // Hata durumunu handle et
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // Sonra checkSubscriptionLimit fonksiyonunu tanımlayalım
+    fun checkSubscriptionLimit(subscription: Subscription) {
+        userPlanInfo?.let { user ->
+            when (user.planType) {
+                PlanType.FREE -> {
+                    if (user.subscriptionCount >= 10) {
+                        // Premium olmayan kullanıcı limit aşımında
+                        showUpgradeDialog = true
+                    } else {
+                        // Limiti aşmamış, üyelik eklenebilir
+                        addSubscription(subscription)
+                    }
+                }
+                PlanType.PREMIUM -> {
+                    // Premium kullanıcı sınırsız ekleyebilir
+                    addSubscription(subscription)
+                }
+            }
+        } ?: run {
+            // Kullanıcı bilgisi yoksa varsayılan olarak FREE plan kabul edelim
+            if (subscriptions.size >= 10) {
+                showUpgradeDialog = true
+            } else {
+                addSubscription(subscription)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             CommonTopBar(
                 title = "subscriptions".localized(currentLanguage),
                 navController = navController,
                 actions = {
-                    IconButton(onClick = { showDialog = true }) {
+                    IconButton(
+                        onClick = {
+                            // Kullanıcı premium değil VE 10 üyeliği varsa direkt Premium sayfasına git
+                            if (userPlanInfo?.planType == PlanType.FREE && subscriptions.size >= 10) {
+                                navController.navigate(Screen.Premium.route)
+                                return@IconButton // Burada işlemi sonlandır
+                            }
+                            
+                            // Diğer tüm durumlarda dialog'u göster
+                            showDialog = true
+                        }
+                    ) {
                         Icon(
                             Icons.Default.Add,
                             contentDescription = "add_subscription".localized(currentLanguage)
@@ -193,10 +293,10 @@ fun SubscriptionsScreen(
                 selectedSubscription = null
             },
             onAdd = { updatedSubscription ->
-                scope.launch {
-                    try {
-                        if (selectedSubscription != null) {
-                            // Düzenleme
+                if (selectedSubscription != null) {
+                    // Düzenleme
+                    scope.launch {
+                        try {
                             db.collection("subscriptions")
                                 .whereEqualTo("id", selectedSubscription?.id)
                                 .whereEqualTo("userId", currentUser?.uid)
@@ -207,21 +307,61 @@ fun SubscriptionsScreen(
                                 ?.reference
                                 ?.set(updatedSubscription)
                                 ?.await()
-                        } else {
-                            // Yeni ekleme
-                            db.collection("subscriptions")
-                                .add(updatedSubscription.copy(
-                                    userId = currentUser?.uid ?: return@launch
-                                ))
-                                .await()
+                            
+                            showDialog = false
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        // Hata durumunu handle et
                     }
+                } else {
+                    // Yeni ekleme
+                    checkSubscriptionLimit(updatedSubscription)
                 }
             },
             currentLanguage = currentLanguage,
             existingSubscription = selectedSubscription
+        )
+    }
+
+    // Premium dialog'unu güncelleyelim
+    if (showUpgradeDialog) {
+        AlertDialog(
+            onDismissRequest = { showUpgradeDialog = false },
+            title = { 
+                Text(
+                    "subscription_limit_reached".localized(currentLanguage),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            text = { 
+                Column {
+                    Text("subscription_limit_message".localized(currentLanguage))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "current_subscription_count".localized(currentLanguage)
+                            .format(userPlanInfo?.subscriptionCount ?: subscriptions.size),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showUpgradeDialog = false
+                        navController.navigate(Screen.Premium.route)
+                    }
+                ) {
+                    Text("upgrade_to_premium".localized(currentLanguage))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showUpgradeDialog = false }
+                ) {
+                    Text("close".localized(currentLanguage))
+                }
+            }
         )
     }
 }
