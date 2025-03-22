@@ -1,5 +1,6 @@
 package com.denizcan.substracktionapp.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -85,16 +86,6 @@ fun SubscriptionsScreen(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showDialog = true }
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "add_subscription".localized(currentLanguage)
-                )
-            }
         }
     ) { paddingValues ->
         if (isLoading) {
@@ -272,6 +263,32 @@ private fun EmptySubscriptionsView(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text("add_subscription".localized(currentLanguage))
+        }
+    }
+}
+
+@Composable
+fun SubscriptionCard(
+    subscription: Subscription,
+    currentLanguage: String,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // ... diğer kodlar aynı ...
         }
     }
 } 

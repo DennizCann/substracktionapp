@@ -32,8 +32,7 @@ fun SubscriptionCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(),
-        onClick = onEditClick
+            // onClick özelliğini kaldırdık
     ) {
         Row(
             modifier = Modifier

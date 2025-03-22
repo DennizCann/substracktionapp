@@ -124,7 +124,19 @@ object StringResources {
         "no_payments_for_date" to "Bu güne ait ödeme bulunmuyor",
         "weekly" to "Haftalık",
         "start_date" to "Başlangıç Tarihi",
-        "ok" to "Tamam"
+        "ok" to "Tamam",
+        "most_expensive_subscription" to "En Pahalı Üyelik",
+        "most_expensive_subscriptions" to "En Pahalı Üyelikler",
+        "welcome_back" to "Hoş geldin",
+        "subscription_summary" to "İşte üyeliklerinin özeti",
+        "delete_account" to "Hesabı Sil",
+        "delete_account_warning" to "Hesabınızı silmek için tıklayın",
+        "delete_account_title" to "Hesabı Silme",
+        "delete_account_message" to "Hesabınızı silmek üzeresiniz. Bu işlem geri alınamaz ve tüm verileriniz silinecektir.",
+        "delete_account_confirm_title" to "Son Onay",
+        "delete_account_confirm_message" to "Hesabınız ve tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+        "delete_account_confirm_button" to "Hesabımı Sil",
+        "close" to "Kapat"
     )
 
     private val enStrings = mapOf(
@@ -243,6 +255,18 @@ object StringResources {
         "no_payments_for_date" to "No payments for this date",
         "weekly" to "Weekly",
         "start_date" to "Start Date",
-        "ok" to "OK"
+        "ok" to "OK",
+        "most_expensive_subscription" to "Most Expensive Subscription",
+        "most_expensive_subscriptions" to "Most Expensive Subscriptions",
+        "welcome_back" to "Welcome back",
+        "subscription_summary" to "Here's your subscription summary",
+        "delete_account" to "Delete Account",
+        "delete_account_warning" to "Click to delete your account",
+        "delete_account_title" to "Delete Account",
+        "delete_account_message" to "You are about to delete your account. This action cannot be undone and all your data will be deleted.",
+        "delete_account_confirm_title" to "Final Confirmation",
+        "delete_account_confirm_message" to "Your account and all your data will be permanently deleted. This action cannot be undone.",
+        "delete_account_confirm_button" to "Delete My Account",
+        "close" to "Close"
     )
 } 
