@@ -3,6 +3,7 @@ package com.denizcan.substracktionapp
 import android.app.Application
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.FirebaseApp
+import com.jakewharton.threetenabp.AndroidThreeTen
 
 class SubsTracktionApp : Application() {
     override fun onCreate() {
@@ -22,5 +23,7 @@ class SubsTracktionApp : Application() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        AndroidThreeTen.init(this)
     }
 } 

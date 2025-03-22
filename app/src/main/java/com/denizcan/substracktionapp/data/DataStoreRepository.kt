@@ -7,15 +7,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-data class UserPreferences(
-    val language: String = "tr",
-    val country: String = "TR",
-    val currency: String = "TRY",
-    val currencySymbol: String = "₺",
-    val isRememberMeEnabled: Boolean = false
-)
 
 class DataStoreRepository(private val context: Context) {
     

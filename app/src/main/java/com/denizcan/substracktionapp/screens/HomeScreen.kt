@@ -17,28 +17,28 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.denizcan.substracktionapp.components.CommonTopBar
 import com.denizcan.substracktionapp.model.BillingPeriod
 import com.denizcan.substracktionapp.model.Subscription
 import com.denizcan.substracktionapp.navigation.Screen
 import com.denizcan.substracktionapp.util.localized
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.NumberFormat
-import java.util.*
 import com.denizcan.substracktionapp.components.NotificationsDialog
 import kotlinx.coroutines.launch
 import com.denizcan.substracktionapp.data.DataStoreRepository
 import com.denizcan.substracktionapp.util.ColorUtils
 import com.denizcan.substracktionapp.util.formatCurrency
 import android.graphics.BitmapFactory
-import android.graphics.Bitmap
 import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import com.denizcan.substracktionapp.model.UpcomingPayment
+import com.denizcan.substracktionapp.util.calculateUpcomingPayments
+import com.denizcan.substracktionapp.util.formatPaymentDate
 import kotlinx.coroutines.tasks.await
+import kotlin.collections.take
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -331,7 +331,85 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Yaklaşan Ödemeler başlığı eklenebilir...
+                // Yaklaşan Ödemeler Kartı
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        // Başlık - artık sadece başlık var, "Tümünü Gör" butonu yok
+                        Text(
+                            text = "upcoming_payments".localized(currentLanguage),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Yaklaşan ödemeleri hesapla ve göster
+                        val upcomingPayments: List<UpcomingPayment> = remember(subscriptions) {
+                            calculateUpcomingPayments(subscriptions).take(3)
+                        }
+
+                        if (upcomingPayments.isEmpty()) {
+                            Text(
+                                text = "no_upcoming_payments".localized(currentLanguage),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        } else {
+                            upcomingPayments.forEach { payment ->
+                                ListItem(
+                                    headlineContent = {
+                                        Text(payment.subscription.name)
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            text = formatPaymentDate(payment.date, currentLanguage),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    trailingContent = {
+                                        Text(
+                                            text = formatCurrency(payment.subscription.amount),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    leadingContent = {
+                                        Surface(
+                                            modifier = Modifier.size(40.dp),
+                                            shape = CircleShape,
+                                            color = Color(payment.subscription.color ?: ColorUtils.subscriptionColors[0].toArgb())
+                                        ) {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = payment.subscription.name.firstOrNull()?.uppercase() ?: "?",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = Color.White
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                                if (payment != upcomingPayments.last()) {
+                                    Divider()
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

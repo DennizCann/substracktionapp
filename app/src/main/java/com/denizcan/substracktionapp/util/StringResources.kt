@@ -136,7 +136,9 @@ object StringResources {
         "delete_account_confirm_title" to "Son Onay",
         "delete_account_confirm_message" to "Hesabınız ve tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz.",
         "delete_account_confirm_button" to "Hesabımı Sil",
-        "close" to "Kapat"
+        "close" to "Kapat",
+        "no_upcoming_payments" to "Yaklaşan ödeme bulunmuyor",
+        "tomorrow" to "Yarın"
     )
 
     private val enStrings = mapOf(
@@ -267,6 +269,8 @@ object StringResources {
         "delete_account_confirm_title" to "Final Confirmation",
         "delete_account_confirm_message" to "Your account and all your data will be permanently deleted. This action cannot be undone.",
         "delete_account_confirm_button" to "Delete My Account",
-        "close" to "Close"
+        "close" to "Close",
+        "no_upcoming_payments" to "No upcoming payments",
+        "tomorrow" to "Tomorrow"
     )
 } 
