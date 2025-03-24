@@ -14,12 +14,21 @@ import com.denizcan.substracktionapp.navigation.Screen
 import com.denizcan.substracktionapp.util.localized
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import com.denizcan.substracktionapp.ui.theme.SubsTracktionAppTheme
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserInfoScreen(
     navController: NavController,
-    currentLanguage: String
+    currentLanguage: String,
+    firebaseAuth: FirebaseAuth? = FirebaseAuth.getInstance(),
+    firestore: FirebaseFirestore? = FirebaseFirestore.getInstance()
 ) {
     var name by remember { mutableStateOf("") }
     var selectedCountry by remember { mutableStateOf<Country?>(null) }
@@ -27,8 +36,7 @@ fun UserInfoScreen(
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    val currentUser = FirebaseAuth.getInstance().currentUser
-    val db = FirebaseFirestore.getInstance()
+    val currentUser = firebaseAuth?.currentUser
 
     // Google hesabıyla giriş yapıldıysa ismi otomatik doldur
     LaunchedEffect(Unit) {
@@ -140,15 +148,15 @@ fun UserInfoScreen(
                             "isTrialActive" to false
                         )
 
-                        db.collection("users")
-                            .document(user.uid)
-                            .set(userInfo)
-                            .addOnSuccessListener {
+                        firestore?.collection("users")
+                            ?.document(user.uid)
+                            ?.set(userInfo)
+                            ?.addOnSuccessListener {
                                 navController.navigate(Screen.Home.route) {
                                     popUpTo(Screen.UserInfo.route) { inclusive = true }
                                 }
                             }
-                            .addOnFailureListener { e ->
+                            ?.addOnFailureListener { e ->
                                 error = "error_saving".localized(currentLanguage)
                                 isLoading = false
                             }
@@ -168,6 +176,46 @@ fun UserInfoScreen(
                     Text("continue".localized(currentLanguage))
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserInfoScreenPreview() {
+    val previewNavController = rememberNavController()
+    
+    SubsTracktionAppTheme {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            UserInfoScreen(
+                navController = previewNavController,
+                currentLanguage = "tr",
+                firebaseAuth = null,
+                firestore = null
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun UserInfoScreenDarkPreview() {
+    val previewNavController = rememberNavController()
+    
+    SubsTracktionAppTheme(darkTheme = true) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            UserInfoScreen(
+                navController = previewNavController,
+                currentLanguage = "en",
+                firebaseAuth = null,
+                firestore = null
+            )
         }
     }
 } 

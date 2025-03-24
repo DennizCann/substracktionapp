@@ -7,7 +7,6 @@ data class Subscription(
     val id: String = UUID.randomUUID().toString(),
     val userId: String = "",
     val name: String = "",
-    val description: String = "",
     val amount: Double = 0.0,
     val category: SubscriptionCategory = SubscriptionCategory.OTHER,
     val billingPeriod: BillingPeriod = BillingPeriod.MONTHLY,
@@ -27,14 +26,22 @@ enum class BillingPeriod {
 }
 
 enum class SubscriptionCategory {
-    ENTERTAINMENT,    // Netflix, Spotify, Disney+, YouTube Premium
-    SHOPPING,        // Amazon Prime, Trendyol Premium
-    PRODUCTIVITY,    // Microsoft 365, Adobe CC, Notion
-    CLOUD,          // iCloud, Google One, Dropbox
-    EDUCATION,      // Udemy, Coursera, Duolingo
-    HEALTH,         // Fitness apps, meditation apps
+    STREAMING,       // Netflix, Disney+, BluTV, Amazon Prime Video
+    MUSIC,          // Spotify, Apple Music, YouTube Music, Deezer
+    AI_TOOLS,       // ChatGPT, Midjourney, Claude
+    SOFTWARE_DEV,   // GitHub, JetBrains, Visual Studio
+    CLOUD_STORAGE,  // Google One, iCloud, Dropbox
     GAMING,         // PlayStation Plus, Xbox Game Pass, Steam
-    FINANCE,        // Trading apps, budgeting apps
-    COMMUNICATION,  // Zoom, Slack premium
+    EDUCATION,      // Udemy, Coursera, Skillshare
+    FITNESS,        // Strava, MyFitnessPal, Nike Training Club
+    NEWS,           // NY Times, Bloomberg, Financial Times
+    DESIGN,         // Adobe CC, Figma, Canva
+    PRODUCTIVITY,   // Microsoft 365, Notion, Evernote
+    SECURITY,       // NordVPN, LastPass, Bitdefender
+    SHOPPING,       // Amazon Prime, Trendyol Premium
+    SOCIAL_MEDIA,   // Twitter Blue, LinkedIn Premium
+    FOOD_DELIVERY,  // Yemeksepeti, Getir
+    READING,        // Medium, Kindle Unlimited, Storytel
+    COMMUNICATION,  // Zoom, Slack, Discord Nitro
     OTHER
 } 

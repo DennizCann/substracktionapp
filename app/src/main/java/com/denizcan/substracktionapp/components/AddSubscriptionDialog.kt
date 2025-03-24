@@ -43,7 +43,6 @@ fun AddSubscriptionDialog(
     existingSubscription: Subscription? = null
 ) {
     var name by remember { mutableStateOf(existingSubscription?.name ?: "") }
-    var description by remember { mutableStateOf(existingSubscription?.description ?: "") }
     var amount by remember { mutableStateOf(existingSubscription?.amount?.toString() ?: "") }
     var selectedColor by remember { mutableStateOf(existingSubscription?.color?.let { Color(it) } ?: ColorUtils.subscriptionColors[0]) }
     var selectedCategory by remember { mutableStateOf(existingSubscription?.category ?: SubscriptionCategory.OTHER) }
@@ -97,15 +96,6 @@ fun AddSubscriptionDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("description".localized(currentLanguage)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
                     value = amount,
                     onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) amount = it },
                     label = { Text("subscription_price".localized(currentLanguage)) },
@@ -126,14 +116,22 @@ fun AddSubscriptionDialog(
                 ) {
                     OutlinedTextField(
                         value = when (selectedCategory) {
-                            SubscriptionCategory.ENTERTAINMENT -> "category_entertainment"
-                            SubscriptionCategory.SHOPPING -> "category_shopping"
-                            SubscriptionCategory.PRODUCTIVITY -> "category_productivity"
-                            SubscriptionCategory.CLOUD -> "category_cloud"
-                            SubscriptionCategory.EDUCATION -> "category_education"
-                            SubscriptionCategory.HEALTH -> "category_health"
+                            SubscriptionCategory.STREAMING -> "category_streaming"
+                            SubscriptionCategory.MUSIC -> "category_music"
+                            SubscriptionCategory.AI_TOOLS -> "category_ai_tools"
+                            SubscriptionCategory.SOFTWARE_DEV -> "category_software_dev"
+                            SubscriptionCategory.CLOUD_STORAGE -> "category_cloud_storage"
                             SubscriptionCategory.GAMING -> "category_gaming"
-                            SubscriptionCategory.FINANCE -> "category_finance"
+                            SubscriptionCategory.EDUCATION -> "category_education"
+                            SubscriptionCategory.FITNESS -> "category_fitness"
+                            SubscriptionCategory.NEWS -> "category_news"
+                            SubscriptionCategory.DESIGN -> "category_design"
+                            SubscriptionCategory.PRODUCTIVITY -> "category_productivity"
+                            SubscriptionCategory.SECURITY -> "category_security"
+                            SubscriptionCategory.SHOPPING -> "category_shopping"
+                            SubscriptionCategory.SOCIAL_MEDIA -> "category_social_media"
+                            SubscriptionCategory.FOOD_DELIVERY -> "category_food_delivery"
+                            SubscriptionCategory.READING -> "category_reading"
                             SubscriptionCategory.COMMUNICATION -> "category_communication"
                             SubscriptionCategory.OTHER -> "category_other"
                         }.localized(currentLanguage),
@@ -145,7 +143,7 @@ fun AddSubscriptionDialog(
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
                     )
 
-                    ExposedDropdownMenu(
+                    DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
@@ -154,14 +152,22 @@ fun AddSubscriptionDialog(
                                 text = {
                                     Text(
                                         when (category) {
-                                            SubscriptionCategory.ENTERTAINMENT -> "category_entertainment"
-                                            SubscriptionCategory.SHOPPING -> "category_shopping"
-                                            SubscriptionCategory.PRODUCTIVITY -> "category_productivity"
-                                            SubscriptionCategory.CLOUD -> "category_cloud"
-                                            SubscriptionCategory.EDUCATION -> "category_education"
-                                            SubscriptionCategory.HEALTH -> "category_health"
+                                            SubscriptionCategory.STREAMING -> "category_streaming"
+                                            SubscriptionCategory.MUSIC -> "category_music"
+                                            SubscriptionCategory.AI_TOOLS -> "category_ai_tools"
+                                            SubscriptionCategory.SOFTWARE_DEV -> "category_software_dev"
+                                            SubscriptionCategory.CLOUD_STORAGE -> "category_cloud_storage"
                                             SubscriptionCategory.GAMING -> "category_gaming"
-                                            SubscriptionCategory.FINANCE -> "category_finance"
+                                            SubscriptionCategory.EDUCATION -> "category_education"
+                                            SubscriptionCategory.FITNESS -> "category_fitness"
+                                            SubscriptionCategory.NEWS -> "category_news"
+                                            SubscriptionCategory.DESIGN -> "category_design"
+                                            SubscriptionCategory.PRODUCTIVITY -> "category_productivity"
+                                            SubscriptionCategory.SECURITY -> "category_security"
+                                            SubscriptionCategory.SHOPPING -> "category_shopping"
+                                            SubscriptionCategory.SOCIAL_MEDIA -> "category_social_media"
+                                            SubscriptionCategory.FOOD_DELIVERY -> "category_food_delivery"
+                                            SubscriptionCategory.READING -> "category_reading"
                                             SubscriptionCategory.COMMUNICATION -> "category_communication"
                                             SubscriptionCategory.OTHER -> "category_other"
                                         }.localized(currentLanguage)
@@ -301,7 +307,6 @@ fun AddSubscriptionDialog(
 
                             val subscription = (existingSubscription ?: Subscription()).copy(
                                 name = name,
-                                description = description,
                                 amount = amount.toDouble(),
                                 category = selectedCategory,
                                 billingPeriod = selectedPeriod,
@@ -346,40 +351,57 @@ private fun calculateNextPaymentDate(
     startDate: Date?
 ): Timestamp {
     val calendar = Calendar.getInstance()
+    val today = Calendar.getInstance()
     
-    when (period) {
-        BillingPeriod.WEEKLY -> {
-            val currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-            if (paymentDay < currentDayOfWeek) {
-                calendar.add(Calendar.WEEK_OF_YEAR, 1)
-            }
-            calendar.set(Calendar.DAY_OF_WEEK, paymentDay)
-        }
-        BillingPeriod.MONTHLY -> {
-            val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
-            if (paymentDay < currentDay) {
-                calendar.add(Calendar.MONTH, 1)
-            }
-            calendar.set(Calendar.DAY_OF_MONTH, paymentDay)
-        }
-        BillingPeriod.QUARTERLY -> {
-            calendar.time = startDate ?: calendar.time
-            calendar.add(Calendar.MONTH, 3)
-        }
-        BillingPeriod.BIANNUALLY -> {
-            calendar.time = startDate ?: calendar.time
-            calendar.add(Calendar.MONTH, 6)
-        }
-        BillingPeriod.YEARLY -> {
-            calendar.time = startDate ?: calendar.time
-            calendar.add(Calendar.YEAR, 1)
-        }
+    // Başlangıç tarihini ayarla
+    if (startDate != null) {
+        calendar.time = startDate
     }
-
+    
+    // Saat, dakika, saniye ve milisaniyeleri sıfırla
     calendar.set(Calendar.HOUR_OF_DAY, 0)
     calendar.set(Calendar.MINUTE, 0)
     calendar.set(Calendar.SECOND, 0)
     calendar.set(Calendar.MILLISECOND, 0)
+
+    when (period) {
+        BillingPeriod.WEEKLY -> {
+            calendar.set(Calendar.DAY_OF_WEEK, paymentDay)
+            if (calendar.before(today)) {
+                calendar.add(Calendar.WEEK_OF_YEAR, 1)
+            }
+        }
+        BillingPeriod.MONTHLY -> {
+            // Önce istenen günü ayarla
+            calendar.set(Calendar.DAY_OF_MONTH, paymentDay)
+            
+            // Eğer ayarlanan tarih bugünden önceyse veya bugünse, bir sonraki aya geç
+            if (!calendar.after(today)) {
+                calendar.add(Calendar.MONTH, 1)
+            }
+        }
+        BillingPeriod.QUARTERLY -> {
+            calendar.set(Calendar.DAY_OF_MONTH, paymentDay)
+            calendar.add(Calendar.MONTH, 3)
+            while (calendar.before(today)) {
+                calendar.add(Calendar.MONTH, 3)
+            }
+        }
+        BillingPeriod.BIANNUALLY -> {
+            calendar.set(Calendar.DAY_OF_MONTH, paymentDay)
+            calendar.add(Calendar.MONTH, 6)
+            while (calendar.before(today)) {
+                calendar.add(Calendar.MONTH, 6)
+            }
+        }
+        BillingPeriod.YEARLY -> {
+            calendar.set(Calendar.DAY_OF_MONTH, paymentDay)
+            calendar.add(Calendar.YEAR, 1)
+            while (calendar.before(today)) {
+                calendar.add(Calendar.YEAR, 1)
+            }
+        }
+    }
 
     return Timestamp(calendar.time)
 }
